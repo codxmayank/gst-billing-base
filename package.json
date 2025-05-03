@@ -7,9 +7,8 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "start": "node dist/server.js",
-    "dev:hot": "ts-node-dev --respawn src/server.ts",
-    "start:hot": "ts-node src/server.ts",
-    "build": "tsc",
+    "build": "tsup",
+    "build:ts": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -30,6 +29,7 @@
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.3",
     "@types/pg": "^8.11.14",
+    "tsup": "^8.4.0",
     "tsx": "^4.6.3",
     "typescript": "^5.4.5"
   }
