@@ -1,30 +1,29 @@
-import { FastifyPluginAsync, FastifyReply, FastifyRequest } from 'fastify';
+import { FastifyReply, FastifyRequest } from 'fastify';
 import jwt from 'jsonwebtoken';
 
-const authPlugin: FastifyPluginAsync = async (fastify) => {
-  fastify.decorate('authenticate', async (req: FastifyRequest, reply: FastifyReply) => {
+const authPlugin = async (req: FastifyRequest, reply: FastifyReply) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    // throw new Error('Unauthorized');
+    reply.status(401).send({ error: 'Unauthorized' });
+  } else {
     try {
-      const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return reply.status(401).send({ error: 'Missing or invalid token' });
-      }
-
-      const JWT_SECRET = process.env.JWT_SECRET;
-      if (!JWT_SECRET) {
-        throw new Error('JWT_SECRET is not set');
-      }
-
+      const secret = process.env.JWT_SECRET!;
       const token = authHeader.split(' ')[1];
-      const decoded = jwt.verify(token, JWT_SECRET) as { sub: string; email: string };
-
-      req.user = {
-        id: decoded.sub,
-        email: decoded.email,
-      };
+      const decoded = jwt.verify(token, secret);
+      req.user = decoded;
     } catch (err) {
-      return reply.status(401).send({ error: 'Unauthorized' });
+      // throw new Error('Invalid token');
+      reply.status(401).send({ error: 'Invalid token' });
     }
-  });
+  }
 };
 
 export default authPlugin;
+
+export const authenticate = (fn: (req: FastifyRequest, reply: FastifyReply) => any) => {
+  return async (req: FastifyRequest, reply: FastifyReply) => {
+    await authPlugin(req, reply);
+    return fn(req, reply);
+  };
+};
