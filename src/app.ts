@@ -3,23 +3,25 @@ import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import authPlugin from './plugins/auth';
 import { authRoutes } from './routes/auth.routes';
+import { userRoutes } from './routes/user.routes';
 
 export const buildApp = async () => {
   const app = Fastify({
-    logger: true, // optional: for better visibility
+    logger: true,
   });
 
-  // Register plugins
   await app.register(cors, {
-    origin: '*', // TODO: tighten in production
+    origin: '*',
   });
 
   await app.register(authPlugin);
 
-  // Register routes
-  app.get('/health', async () => ({ ok: true }));
-  
   await app.register(authRoutes);
+  await app.register(userRoutes, {
+    prefix: '/api/v1/user',
+    onRequest: [app.authenticate]
+  });
+  app.get('/health', async () => ({ ok: true }));
 
   return app;
 }

@@ -3,8 +3,6 @@ import jwt from 'jsonwebtoken';
 import { createUser, findUserByEmail } from '../dao/auth.dao';
 import { hashPassword, verifyPassword } from '../utils/hash';
 
-const JWT_SECRET = process.env.JWT_SECRET!;
-
 export const signupService = async (name: string, email: string, password: string, mobile: string) => {
   const existingUser = await findUserByEmail(email);
   if (existingUser) {
@@ -23,7 +21,7 @@ export const loginService = async (email: string, password: string) => {
   const isValid = await verifyPassword(password, user.password);
   if (!isValid) throw new Error('Invalid credentials');
 
-  // Generate JWT
+  const JWT_SECRET = process.env.JWT_SECRET!;
   const token = jwt.sign(
     {
       sub: user.id,
